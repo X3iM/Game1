@@ -28,12 +28,10 @@ public class AlarmHandler : MonoBehaviour
 
     private IEnumerator IncreaseVolumeAlarm()
     {
-        _audioSource.volume += _volumeChangeRate;
-        
-        if (_audioSource.volume < _maxVolume)
+        while (_audioSource.volume < _maxVolume)
         {
+            _audioSource.volume += _volumeChangeRate;
             yield return new WaitForSeconds(_volumeChangeRate);
-            yield return IncreaseVolumeAlarm();
         }
         yield return new WaitForSeconds(_volumeChangeRate); 
     }
@@ -44,12 +42,10 @@ public class AlarmHandler : MonoBehaviour
 
     private IEnumerator DecreaseVolumeAlarm()
     {
-        _audioSource.volume -= _volumeChangeRate;
-        
-        if (_audioSource.volume > _minVolume)
+        while (_audioSource.volume > _minVolume)
         {
+            _audioSource.volume -= _volumeChangeRate;
             yield return new WaitForSeconds(_volumeChangeRate);
-            yield return DecreaseVolumeAlarm();
         }
         
         _audioSource.Stop();
