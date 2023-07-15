@@ -1,12 +1,16 @@
 using System.Collections;
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))]
 public class AlarmHandler : MonoBehaviour
 {
     [SerializeField] private float _volumeChangeRate = 0.01f;
     [SerializeField] private float _maxVolume = 1f;
     [SerializeField] private float _minVolume = 0;
+
     private AudioSource _audioSource;
+    private float _targetVolume;
+    private Coroutine _job;
 
     private void Start()
     {
@@ -22,33 +26,31 @@ public class AlarmHandler : MonoBehaviour
 
     private void OnDoorOpen()
     {
-        _audioSource.Play();
-        StartCoroutine(IncreaseVolumeAlarm());
-    }
+        if (_job != null)
+            StopCoroutine(_job);
 
-    private IEnumerator IncreaseVolumeAlarm()
-    {
-        while (_audioSource.volume < _maxVolume)
-        {
-            _audioSource.volume += _volumeChangeRate;
-            yield return new WaitForSeconds(_volumeChangeRate);
-        }
-        yield return new WaitForSeconds(_volumeChangeRate); 
+        _targetVolume = _maxVolume;
+        _audioSource.Play();
+        _job = StartCoroutine(ChangeVolumeAlarm());
     }
+    
     private void DoorClosed()
     {
-        StartCoroutine(DecreaseVolumeAlarm());
+        if (_job != null)
+            StopCoroutine(_job);
+
+        _targetVolume = _minVolume;
+        _job = StartCoroutine(ChangeVolumeAlarm());
     }
 
-    private IEnumerator DecreaseVolumeAlarm()
+    private IEnumerator ChangeVolumeAlarm()
     {
-        while (_audioSource.volume > _minVolume)
+        WaitForSeconds wait = new WaitForSeconds(_volumeChangeRate);
+        while (Mathf.Abs(_audioSource.volume - _targetVolume) > 0)
         {
-            _audioSource.volume -= _volumeChangeRate;
-            yield return new WaitForSeconds(_volumeChangeRate);
+            float volume = Mathf.MoveTowards(_audioSource.volume, _targetVolume, Time.deltaTime);
+            _audioSource.volume = volume;
+            yield return wait;
         }
-        
-        _audioSource.Stop();
-        yield return new WaitForSeconds(_volumeChangeRate);
     }
 }
