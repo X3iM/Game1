@@ -5,6 +5,7 @@ public class Enemy : MonoBehaviour
 {
     [SerializeField] private Transform[] _points;
     [SerializeField] private float _speed = 3f;
+    [SerializeField] private float _waypointDistance = 0.1f;
 
     private SpriteRenderer _spriteRenderer;
     private int _currentWaypointIndex;
@@ -19,7 +20,7 @@ public class Enemy : MonoBehaviour
     {
         Transform wp = _points[_currentWaypointIndex];
 
-        if (Vector3.Distance(transform.position, wp.position) < 0.1f)
+        if (Vector3.Distance(transform.position, wp.position) < _waypointDistance)
         {
             _currentWaypointIndex = (_currentWaypointIndex + 1) % _points.Length;
             ChangeDirection();
